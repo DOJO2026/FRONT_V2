@@ -16,9 +16,20 @@ import { AiTooltipDirective } from '../../../../../shared/ui/ai-tooltip';
       @if (!chatState.sidebarCollapsed()) {
         <div class="flex items-center justify-between gap-1 pb-1">
           <a
+            routerLink="/claims"
+            routerLinkActive="text-[var(--color-primary)] bg-white/5"
+            class="flex-1 flex items-center justify-center gap-1.5 px-2 py-1.5 rounded-lg text-xs text-slate-400 hover:text-white hover:bg-white/5 transition-colors"
+            aiTooltip="Reclamos & Power Automate"
+            tooltipPosition="top"
+          >
+            <ai-icon name="document" [size]="14" />
+            <span>Reclamos</span>
+          </a>
+
+          <a
             routerLink="/analytics"
             routerLinkActive="text-[var(--color-primary)] bg-white/5"
-            class="flex-1 flex items-center gap-2 px-2.5 py-1.5 rounded-lg text-xs text-slate-400 hover:text-white hover:bg-white/5 transition-colors"
+            class="flex-1 flex items-center justify-center gap-1.5 px-2 py-1.5 rounded-lg text-xs text-slate-400 hover:text-white hover:bg-white/5 transition-colors"
             aiTooltip="Métricas de tokens y uso"
             tooltipPosition="top"
           >
@@ -29,7 +40,7 @@ import { AiTooltipDirective } from '../../../../../shared/ui/ai-tooltip';
           <a
             routerLink="/design-system"
             routerLinkActive="text-[var(--color-primary)] bg-white/5"
-            class="flex-1 flex items-center gap-2 px-2.5 py-1.5 rounded-lg text-xs text-slate-400 hover:text-white hover:bg-white/5 transition-colors"
+            class="flex-1 flex items-center justify-center gap-1.5 px-2 py-1.5 rounded-lg text-xs text-slate-400 hover:text-white hover:bg-white/5 transition-colors"
             aiTooltip="Componentes & Design Tokens"
             tooltipPosition="top"
           >

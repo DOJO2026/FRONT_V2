@@ -1,0 +1,85 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "DojoClaimWebhookPayload",
+  "description": "Payload JSON enviado por DOJO 2.0 hacia el trigger HTTP de Microsoft Power Automate",
+  "type": "object",
+  "required": [
+    "ticketId",
+    "title",
+    "category",
+    "priority",
+    "requestedBy",
+    "approverEmail",
+    "justification",
+    "timestamp"
+  ],
+  "properties": {
+    "ticketId": {
+      "type": "string",
+      "example": "REC-2026-0842"
+    },
+    "title": {
+      "type": "string",
+      "example": "Reclamo por degradación de SLA en Cluster EKS Producción"
+    },
+    "category": {
+      "type": "string",
+      "enum": [
+        "SLA & Infraestructura",
+        "Facturación Cloud",
+        "Acceso & Seguridad",
+        "Pase a Producción Urgente"
+      ],
+      "example": "SLA & Infraestructura"
+    },
+    "priority": {
+      "type": "string",
+      "enum": ["BAJA", "MEDIA", "ALTA", "CRÍTICA"],
+      "example": "CRÍTICA"
+    },
+    "requestedBy": {
+      "type": "object",
+      "required": ["name", "email", "role"],
+      "properties": {
+        "name": {
+          "type": "string",
+          "example": "Diego Bueno"
+        },
+        "email": {
+          "type": "string",
+          "example": "diego.bueno@dojo.corp"
+        },
+        "role": {
+          "type": "string",
+          "example": "Arquitecto Cloud & DevOps"
+        }
+      }
+    },
+    "approverEmail": {
+      "type": "string",
+      "format": "email",
+      "example": "supervisor.ti@dojo.corp"
+    },
+    "amountOrImpact": {
+      "type": "string",
+      "example": "$3,450 USD de penalización SLA acumulada"
+    },
+    "justification": {
+      "type": "string",
+      "example": "Incidente P1 con pérdida de paquetes por 42 minutos. Se solicita aprobación para nota de crédito y remediación prioritaria."
+    },
+    "systemSource": {
+      "type": "string",
+      "example": "DOJO 2.0 Frontend"
+    },
+    "timestamp": {
+      "type": "string",
+      "format": "date-time",
+      "example": "2026-10-06T15:30:00.000Z"
+    },
+    "callbackWebhookUrl": {
+      "type": "string",
+      "example": "https://api.dojo.corp/api/v1/claims/callback"
+    }
+  }
+}

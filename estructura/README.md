@@ -27,5 +27,8 @@ Para la guía detallada de integración, cabeceras, rutas y modelos TypeScript, 
 | **Estados** | [`estados/user-profile.json`](./estados/user-profile.json) | Perfil de sesión, cuota de tokens y permisos de **Diego Bueno**. |
 | **Estados** | [`estados/models-config.json`](./estados/models-config.json) | Modelos LLM disponibles (Gemini 1.5 Pro, Flash, Gemma) y parámetros de inferencia. |
 | **Estados** | [`estados/system-status.json`](./estados/system-status.json) | Estado de salud de clusters EKS, microservicios monitoreados y SLA. |
-| **Entorno** | [`DEPENDENCIAS_CODESPACE.md`](./DEPENDENCIAS_CODESPACE.md) | Documento con requisitos del sistema, Node, extensiones y paquetes para GitHub Codespaces. |
-| **Entorno** | [`dependencias-codespace.json`](./dependencias-codespace.json) | Especificación JSON completa de dependencias para aprovisionamiento automatizado. |
+| **Power Automate** | [`power-automate/reclamo-webhook-request.json`](./power-automate/reclamo-webhook-request.json) | Payload enviado al trigger HTTP de Power Automate para iniciar la aprobación. |
+| **Power Automate** | [`power-automate/reclamo-webhook-response.json`](./power-automate/reclamo-webhook-response.json) | Respuesta síncrona devuelta por Power Automate. |
+| **Power Automate** | [`power-automate/reclamo-callback-approval.json`](./power-automate/reclamo-callback-approval.json) | Payload emitido al aprobar/rechazar desde el correo interactivo de Outlook. |
+| **Power Automate** | [`power-automate/GUIA_POWER_AUTOMATE_PASO_A_PASO.md`](./power-automate/GUIA_POWER_AUTOMATE_PASO_A_PASO.md) | Guía técnica completa paso a paso con diagrama y configuración del flujo. |
+

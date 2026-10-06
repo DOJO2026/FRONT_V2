@@ -1,5 +1,6 @@
 import { Injectable, computed, inject, signal } from '@angular/core';
 import { ChatStateService } from '../../../core/services/chat-state.service';
+import { ClaimsService } from '../../claims/services/claims.service';
 import { INITIAL_CHAT_MESSAGES_MOCK } from '../mocks/chat-messages.mock';
 import { ChatMessage, MessageSource, ScannedAttachment } from '../models/chat-message.model';
 
@@ -8,6 +9,7 @@ import { ChatMessage, MessageSource, ScannedAttachment } from '../models/chat-me
 })
 export class ChatService {
   private readonly chatState = inject(ChatStateService);
+  private readonly claimsService = inject(ClaimsService);
 
   // Map of conversationId -> ChatMessage[]
   private readonly conversationStore = signal<Record<string, ChatMessage[]>>(INITIAL_CHAT_MESSAGES_MOCK);
@@ -220,6 +222,18 @@ export class ChatService {
 
   finalizeScannedDocument(messageId: string, file: ScannedAttachment): void {
     const activeId = this.chatState.activeChatId();
+
+    // Auto-registrar reclamo en ClaimsService y enviarlo a Power Automate
+    const newClaim = this.claimsService.createClaim({
+      title: `Reclamo generado por evidencia telemétrica: ${file.name}`,
+      category: 'SLA & Infraestructura',
+      priority: 'ALTA',
+      approverEmail: this.claimsService.config().outlookTriggerEmail || 'diego.bueno@ayesa.com',
+      amountOrImpact: file.ocrExtractedData?.declaredAmount || '$2,400 USD / RTO 12 min',
+      justification: `Evidencia técnica escaneada y validada en DOJO AI con firma SHA-256 (${file.sha256}). Se requiere aprobación para compensación y remediación de SLA.`,
+      autoSend: true
+    });
+
     this.conversationStore.update((store) => {
       const list = store[activeId] || [];
       return {
@@ -228,8 +242,13 @@ export class ChatService {
           m.id === messageId
             ? {
                 ...m,
-                content: `¡Tu documento **${file.name}** ha sido escaneado, verificado con firma digital y vinculado exitosamente a tu expediente de reclamo!\n\nHemos creado el radicado oficial **#REC-2026-8942-ALL**. La evidencia documental ha sido procesada mediante OCR óptico y almacenada en la base de conocimiento segura con verificación criptográfica SHA-256.`,
+                content: `¡Tu documento **${file.name}** ha sido escaneado, verificado con firma digital y registrado como reclamo oficial!\n\nHemos creado el ticket **#${newClaim.id}** y lo hemos enviado automáticamente a **Power Automate** para aprobación interactiva en Outlook.`,
                 interactiveType: 'claim_scanned_result',
+                claimDetails: {
+                  claimNumber: newClaim.id,
+                  status: 'EN_APROBACION_OUTLOOK',
+                  description: newClaim.title
+                },
                 attachmentState: {
                   file,
                   isScanning: false,

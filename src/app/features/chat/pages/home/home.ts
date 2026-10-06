@@ -17,6 +17,7 @@ import { AiTooltipDirective } from '../../../../shared/ui/ai-tooltip';
 import { BmwDamageVisualizerComponent, DamageArea } from '../../components/bmw-damage-visualizer/bmw-damage-visualizer.component';
 import { MessageBubbleComponent } from '../../components/message-bubble/message-bubble.component';
 import { PolicyUploadCardComponent } from '../../components/policy-upload-card/policy-upload-card.component';
+import { ClaimsService } from '../../../claims/services/claims.service';
 import { ChatService } from '../../services/chat.service';
 
 export type AssistantViewMode = 'damage' | 'policy' | 'chat';
@@ -331,6 +332,7 @@ export type AssistantViewMode = 'damage' | 'policy' | 'chat';
 export class HomeComponent implements AfterViewChecked {
   protected readonly chatService = inject(ChatService);
   protected readonly chatState = inject(ChatStateService);
+  protected readonly claimsService = inject(ClaimsService);
 
   readonly activeMode = signal<AssistantViewMode>('chat'); // Defaults to Chat view as requested
   promptText = '';
@@ -370,8 +372,19 @@ export class HomeComponent implements AfterViewChecked {
   }
 
   protected onDamageConfirmed(area: DamageArea): void {
+    // Auto-registrar reclamo en ClaimsService y enviarlo a Power Automate
+    const claim = this.claimsService.createClaim({
+      title: `Reclamo por fallo detectado en ${area.name} (${area.severity})`,
+      category: 'SLA & Infraestructura',
+      priority: area.severity === 'Heavy' ? 'CRITICA' : 'ALTA',
+      approverEmail: 'supervisor.ti@dojo.corp',
+      amountOrImpact: `Afectación en ${area.name} - ${area.description}`,
+      justification: `Detectado mediante escáner de visión 3D de infraestructura de DOJO AI. ${area.description}. Se solicita aprobación para remediación técnica y compensación SLA.`,
+      autoSend: true
+    });
+
     this.chatService.sendMessage(
-      `Confirmo el diagnóstico del componente ${area.name} (${area.severity}). Proceder con la mitigación técnica y registro de la incidencia.`
+      `Confirmo el diagnóstico del componente ${area.name} (${area.severity}). Se ha radicado el reclamo #${claim.id} y disparado el flujo a Power Automate para aprobación en Outlook.`
     );
     this.setMode('chat');
   }

@@ -1,0 +1,15 @@
+{
+  "success": true,
+  "statusCode": 202,
+  "flowExecutionId": "pa-flow-run-8f3b299e-761a-4d32-9cb2-d39b8c04901f",
+  "flowName": "DOJO 2.0 • Reclamos y Aprobaciones por Correo Outlook",
+  "message": "Solicitud de reclamo recibida correctamente. El proceso de aprobación ha sido iniciado y se envió la notificación interactiva al aprobador.",
+  "data": {
+    "ticketId": "REC-2026-0842",
+    "status": "ESPERANDO_APROBACION_OUTLOOK",
+    "approverEmail": "supervisor.ti@dojo.corp",
+    "approvalType": "Approve/Reject - First to respond",
+    "initiatedAt": "2026-10-06T15:30:02.140Z",
+    "estimatedSlaHours": 4
+  }
+}

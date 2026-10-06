@@ -1,0 +1,17 @@
+{
+  "event": "APPROVAL_COMPLETED",
+  "ticketId": "REC-2026-0842",
+  "flowExecutionId": "pa-flow-run-8f3b299e-761a-4d32-9cb2-d39b8c04901f",
+  "outcome": "Approve",
+  "status": "APROBADO",
+  "approver": {
+    "name": "Mariana Ríos (Gerencia de Operaciones Cloud)",
+    "email": "supervisor.ti@dojo.corp"
+  },
+  "comments": "Revisado con el equipo de infraestructura. Aprobada la solicitud de compensación por afectación SLA y remediación prioritaria del clúster.",
+  "responseDate": "2026-10-06T15:42:18.892Z",
+  "details": {
+    "timeToRespondMinutes": 12,
+    "channel": "Outlook Actionable Message"
+  }
+}

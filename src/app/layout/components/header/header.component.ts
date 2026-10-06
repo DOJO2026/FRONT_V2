@@ -62,6 +62,14 @@ import { AiTooltipDirective } from '../../../shared/ui/ai-tooltip';
           >
             Incidencias
           </a>
+          <a
+            routerLink="/claims"
+            routerLinkActive="text-[#003781] font-semibold bg-blue-50/70"
+            class="px-3 py-1.5 rounded-lg hover:text-[#003781] hover:bg-slate-50 transition-colors cursor-pointer flex items-center gap-1.5"
+          >
+            <span>Reclamos & Power Automate</span>
+            <span class="w-1.5 h-1.5 rounded-full bg-blue-600 animate-pulse"></span>
+          </a>
           <button
             type="button"
             (click)="shortcutsService.open()"

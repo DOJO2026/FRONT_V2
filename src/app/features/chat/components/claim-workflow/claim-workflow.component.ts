@@ -1,4 +1,5 @@
 import { Component, computed, inject, input, signal } from '@angular/core';
+import { RouterLink } from '@angular/router';
 import { AiButtonComponent } from '../../../../shared/ui/ai-button';
 import { AiIconComponent } from '../../../../shared/ui/ai-icon';
 import { ChatMessage, ScannedAttachment } from '../../models/chat-message.model';
@@ -9,6 +10,7 @@ import { DocumentThumbnailComponent } from './document-thumbnail.component';
   selector: 'app-claim-workflow',
   standalone: true,
   imports: [
+    RouterLink,
     AiIconComponent,
     AiButtonComponent,
     DocumentThumbnailComponent
@@ -330,17 +332,23 @@ import { DocumentThumbnailComponent } from './document-thumbnail.component';
                   <ai-icon name="check" [size]="16" />
                 </div>
                 <div>
-                  <h4 class="text-xs font-bold text-[#002147] tracking-wide">
-                    INCIDENCIA TÉCNICA RADICADA & DIAGNOSTICADA
+                  <h4 class="text-xs font-bold text-[#002147] tracking-wide flex items-center gap-1.5">
+                    <span>RECLAMO RADICADO & DISPARADO A POWER AUTOMATE</span>
+                    <span class="w-1.5 h-1.5 rounded-full bg-blue-600 animate-ping"></span>
                   </h4>
-                  <p class="text-[10px] text-slate-500">Verificación RAG de telemetría y firma SHA-256 de logs autenticados.</p>
+                  <p class="text-[10px] text-slate-500">Verificación RAG de telemetría, firma SHA-256 y notificación de aprobación enviada a Outlook.</p>
                 </div>
               </div>
 
-              <span class="px-2.5 py-1 rounded-full text-[10px] font-mono font-semibold bg-[#e6f9f3] text-[#059669] border border-[#a7f3d0] flex items-center gap-1.5">
-                <span class="w-1.5 h-1.5 rounded-full bg-[#059669] animate-pulse"></span>
-                <span>Ticket #INC-2026-8942</span>
-              </span>
+              <div class="flex items-center gap-2">
+                <span class="px-2.5 py-1 rounded-full text-[10px] font-mono font-bold bg-[#e8f2fa] text-[#003781] border border-[#c2d9ee] flex items-center gap-1.5 shadow-2xs">
+                  <span class="w-1.5 h-1.5 rounded-full bg-[#003781] animate-pulse"></span>
+                  <span>Ticket #{{ message().claimDetails?.claimNumber || 'REC-2026-0850' }}</span>
+                </span>
+                <span class="hidden sm:inline-flex px-2 py-0.5 rounded-full text-[9px] font-bold uppercase bg-amber-50 text-amber-700 border border-amber-200">
+                  En Aprobación Outlook
+                </span>
+              </div>
             </div>
 
             <!-- Document Thumbnail + Verification Metadata Layout -->
@@ -420,7 +428,15 @@ import { DocumentThumbnailComponent } from './document-thumbnail.component';
                 Reporte técnico oficial de incidencia disponible para auditoría y descarga.
               </div>
 
-              <div class="flex items-center gap-2">
+              <div class="flex items-center gap-2 flex-wrap">
+                <a
+                  routerLink="/claims"
+                  class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-[#003781] hover:bg-[#002860] text-white text-xs font-bold shadow-xs cursor-pointer transition-all"
+                >
+                  <ai-icon name="document" [size]="14" />
+                  <span>Ver en Reclamos Power Automate</span>
+                </a>
+
                 <ai-button
                   variant="secondary"
                   size="sm"
@@ -431,7 +447,7 @@ import { DocumentThumbnailComponent } from './document-thumbnail.component';
                 </ai-button>
 
                 <ai-button
-                  variant="primary"
+                  variant="ghost"
                   size="sm"
                   (click)="startNewChat()"
                 >

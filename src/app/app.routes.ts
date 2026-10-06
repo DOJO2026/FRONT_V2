@@ -6,6 +6,7 @@ import { DesignSystemComponent } from './features/playground/pages/design-system
 import { AnalyticsDashboardComponent } from './features/analytics/pages/analytics-dashboard/analytics-dashboard';
 import { KnowledgeBaseComponent } from './features/knowledge/pages/knowledge-base/knowledge-base.component';
 import { HistoryDashboardComponent } from './features/history/pages/history-dashboard/history-dashboard.component';
+import { ClaimsDashboardComponent } from './features/claims/pages/claims-dashboard/claims-dashboard.component';
 
 export const routes: Routes = [
     {
@@ -15,6 +16,15 @@ export const routes: Routes = [
             {
                 path: '',
                 component: HomeComponent
+            },
+            {
+                path: 'claims',
+                component: ClaimsDashboardComponent
+            },
+            {
+                path: 'reclamos',
+                redirectTo: 'claims',
+                pathMatch: 'full'
             },
             {
                 path: 'knowledge',
@@ -34,4 +44,4 @@ export const routes: Routes = [
             }
         ]
     }
-];
+];
