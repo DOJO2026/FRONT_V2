@@ -27,3 +27,5 @@ Para la guía detallada de integración, cabeceras, rutas y modelos TypeScript, 
 | **Estados** | [`estados/user-profile.json`](./estados/user-profile.json) | Perfil de sesión, cuota de tokens y permisos de **Diego Bueno**. |
 | **Estados** | [`estados/models-config.json`](./estados/models-config.json) | Modelos LLM disponibles (Gemini 1.5 Pro, Flash, Gemma) y parámetros de inferencia. |
 | **Estados** | [`estados/system-status.json`](./estados/system-status.json) | Estado de salud de clusters EKS, microservicios monitoreados y SLA. |
+| **Entorno** | [`DEPENDENCIAS_CODESPACE.md`](./DEPENDENCIAS_CODESPACE.md) | Documento con requisitos del sistema, Node, extensiones y paquetes para GitHub Codespaces. |
+| **Entorno** | [`dependencias-codespace.json`](./dependencias-codespace.json) | Especificación JSON completa de dependencias para aprovisionamiento automatizado. |

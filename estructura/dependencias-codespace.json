@@ -1,0 +1,140 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "project": "FRONT_V2 - DOJO 2.0",
+  "version": "0.0.0",
+  "targetEnvironment": "GitHub Codespaces / Linux Container Dev Environment",
+  "systemRequirements": {
+    "node": {
+      "version": ">=20.18.0 <23.0.0",
+      "recommended": "v22.x LTS (o v20.x LTS)"
+    },
+    "npm": {
+      "version": ">=10.8.0",
+      "recommended": "v11.x"
+    },
+    "operatingSystem": "Linux (Ubuntu / Debian base en Codespace)",
+    "ports": [
+      {
+        "port": 4200,
+        "label": "Angular Dev Server",
+        "onAutoForward": "openBrowser"
+      }
+    ]
+  },
+  "globalTools": [
+    {
+      "package": "@angular/cli",
+      "version": "^20.3.2",
+      "installCommand": "npm install -g @angular/cli@20.3.2",
+      "purpose": "CLI oficial de Angular para compilar, generar y servir el proyecto"
+    }
+  ],
+  "productionDependencies": {
+    "@angular/cdk": {
+      "version": "^20.2.14",
+      "purpose": "Component Dev Kit de Angular (overlays, a11y, scrolling virtual)"
+    },
+    "@angular/common": {
+      "version": "^20.3.0",
+      "purpose": "Directivas y pipes comunes de Angular"
+    },
+    "@angular/compiler": {
+      "version": "^20.3.0",
+      "purpose": "Compilador del framework Angular"
+    },
+    "@angular/core": {
+      "version": "^20.3.0",
+      "purpose": "Núcleo reactivo del framework Angular (Signals, Zoneless)"
+    },
+    "@angular/forms": {
+      "version": "^20.3.0",
+      "purpose": "Formularios reactivos y basados en plantillas"
+    },
+    "@angular/platform-browser": {
+      "version": "^20.3.0",
+      "purpose": "Soporte de renderizado en el navegador"
+    },
+    "@angular/router": {
+      "version": "^20.3.0",
+      "purpose": "Enrutador declarativo SPA"
+    },
+    "@tailwindcss/postcss": {
+      "version": "^4.3.3",
+      "purpose": "Plugin PostCSS para Tailwind CSS v4"
+    },
+    "postcss": {
+      "version": "^8.5.26",
+      "purpose": "Procesador CSS y canalización de estilos"
+    },
+    "rxjs": {
+      "version": "~7.8.0",
+      "purpose": "Librería reactiva de programación asíncrona"
+    },
+    "tailwindcss": {
+      "version": "^4.3.3",
+      "purpose": "Framework de estilos utility-first v4"
+    },
+    "tslib": {
+      "version": "^2.3.0",
+      "purpose": "Librería de helpers en tiempo de ejecución para TypeScript"
+    }
+  },
+  "devDependencies": {
+    "@angular/build": {
+      "version": "^20.3.2",
+      "purpose": "Constructor moderno basado en Vite/esbuild de Angular"
+    },
+    "@angular/cli": {
+      "version": "^20.3.2",
+      "purpose": "Interfaz de línea de comandos de desarrollo de Angular"
+    },
+    "@angular/compiler-cli": {
+      "version": "^20.3.0",
+      "purpose": "Compilador AoT para TypeScript"
+    },
+    "@types/jasmine": {
+      "version": "~5.1.0",
+      "purpose": "Tipos TypeScript para el framework de testing Jasmine"
+    },
+    "jasmine-core": {
+      "version": "~5.9.0",
+      "purpose": "Framework BDD para pruebas unitarias de JavaScript/TypeScript"
+    },
+    "karma": {
+      "version": "~6.4.0",
+      "purpose": "Test runner en navegador"
+    },
+    "karma-chrome-launcher": {
+      "version": "~3.2.0",
+      "purpose": "Lanzador de Chrome/Chromium para Karma (requiere Chromium en Codespace)"
+    },
+    "karma-coverage": {
+      "version": "~2.2.0",
+      "purpose": "Generación de reportes de cobertura de código"
+    },
+    "karma-jasmine": {
+      "version": "~5.1.0",
+      "purpose": "Adaptador Karma para Jasmine"
+    },
+    "karma-jasmine-html-reporter": {
+      "version": "~2.1.0",
+      "purpose": "Visualizador HTML de resultados de pruebas"
+    },
+    "typescript": {
+      "version": "~5.9.2",
+      "purpose": "Compilador del lenguaje TypeScript"
+    }
+  },
+  "recommendedCodespaceExtensions": [
+    "angular.ng-template",
+    "bradlc.vscode-tailwindcss",
+    "esbenp.prettier-vscode",
+    "dbaeumer.vscode-eslint"
+  ],
+  "setupCommands": {
+    "quickInstall": "npm install",
+    "startDev": "npm start",
+    "startDevCodespaceHost": "npm start -- --host 0.0.0.0 --disable-host-check",
+    "buildProduction": "npm run build"
+  }
+}
