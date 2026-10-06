@@ -1,0 +1,42 @@
+{
+  "name": "Frontend Angular 20",
+
+  "image": "mcr.microsoft.com/devcontainers/typescript-node:1-22-bookworm",
+
+  "features": {
+    "ghcr.io/devcontainers/features/git:1": {},
+    "ghcr.io/devcontainers/features/git-lfs:1": {},
+    "ghcr.io/devcontainers/features/github-cli:1": {},
+    "ghcr.io/devcontainers/features/azure-cli:1": {}
+  },
+
+  "remoteUser": "node",
+
+  "containerEnv": {
+    "CHROME_BIN": "/usr/bin/chromium",
+    "NG_CLI_ANALYTICS": "false"
+  },
+
+  "customizations": {
+    "vscode": {
+      "extensions": [
+        "angular.ng-template",
+        "bradlc.vscode-tailwindcss",
+        "esbenp.prettier-vscode",
+        "dbaeumer.vscode-eslint",
+        "github.vscode-github-actions"
+      ]
+    }
+  },
+
+  "forwardPorts": [4200],
+
+  "portsAttributes": {
+    "4200": {
+      "label": "Angular Dev Server",
+      "onAutoForward": "openBrowser"
+    }
+  },
+
+  "postCreateCommand": "git lfs install && sudo apt-get update && sudo apt-get install -y chromium && npm install -g @angular/cli@20.3.2 && ng config --global cli.completion.prompted true && npm ci"
+}
