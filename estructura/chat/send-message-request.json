@@ -1,0 +1,17 @@
+{
+  "conversationId": "chat-1",
+  "content": "¿Cuáles son los parámetros de autoescalado y throttling en el API Gateway para mitigar picos de latencia P99?",
+  "modelId": "gemini-1.5-pro",
+  "temperature": 0.2,
+  "reasoningDepth": "standard",
+  "stream": true,
+  "attachedDocs": [
+    "Arquitectura_Plataforma_DOJO_2.0.pdf",
+    "Runbook_Operaciones_Cloud_2026.pdf"
+  ],
+  "contextFilter": {
+    "category": "Infraestructura",
+    "similarityThreshold": 0.82,
+    "topK": 8
+  }
+}

@@ -1,0 +1,10 @@
+:root {
+  --layout-header-height: 4rem;      /* 64px */
+  --layout-sidebar-width: 17.5rem;   /* 280px */
+  --layout-sidebar-collapsed: 4.5rem;/* 72px */
+  --layout-content-max-width: 56rem; /* 896px */
+  --layout-z-header: 40;
+  --layout-z-sidebar: 30;
+  --layout-z-modal: 50;
+  --layout-z-tooltip: 60;
+}

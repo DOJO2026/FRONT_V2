@@ -1,0 +1,44 @@
+{
+  "platform": "DOJO 2.0",
+  "environment": "production",
+  "version": "2.4.0-stable",
+  "status": "healthy",
+  "timestamp": "2026-10-05T17:45:00Z",
+  "observability": {
+    "monitoredMicroservices": 1240,
+    "activeCloudRegions": 7,
+    "currentP99LatencyMs": 78.4,
+    "currentSlaCompliancePercent": 99.98,
+    "targetSlaPercent": 99.95,
+    "openTelemetryStatus": "active"
+  },
+  "clusters": [
+    {
+      "id": "eks-prod-us-east-01",
+      "name": "Cluster Kubernetes EKS-PROD-01 (US-East)",
+      "status": "degraded",
+      "nodesCount": 48,
+      "cpuUtilization": 76.2,
+      "memoryUtilization": 81.4,
+      "activeIncidents": [
+        "INC-2026-8942-PROD"
+      ]
+    },
+    {
+      "id": "gke-prod-eu-west-01",
+      "name": "Cluster GKE-PROD-02 (EU-West)",
+      "status": "optimal",
+      "nodesCount": 32,
+      "cpuUtilization": 48.0,
+      "memoryUtilization": 52.3,
+      "activeIncidents": []
+    }
+  ],
+  "agentStatus": {
+    "agentName": "DOJO AI",
+    "role": "Copiloto de Sistemas & Infraestructura Cloud",
+    "state": "ready",
+    "activeConnections": 14,
+    "averageInferenceMs": 420
+  }
+}

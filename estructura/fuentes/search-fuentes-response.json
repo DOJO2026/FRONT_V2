@@ -1,0 +1,30 @@
+{
+  "success": true,
+  "data": {
+    "totalMatches": 2,
+    "searchTimeMs": 42,
+    "embeddingModel": "text-embedding-004",
+    "results": [
+      {
+        "id": "src-101",
+        "title": "Runbook_Operaciones_Cloud_2026.pdf",
+        "page": 15,
+        "category": "DevOps & SRE",
+        "confidence": 98.2,
+        "chunkId": "chk_eks_sre_4921",
+        "cosineSimilarity": 0.982,
+        "snippet": "El copiloto DOJO AI analiza telemetría en tiempo real, correlaciona trazas OpenTelemetry y automatiza el diagnóstico de fallos críticos."
+      },
+      {
+        "id": "src-105",
+        "title": "Guia_Optimizacion_Spanner_BigQuery.pdf",
+        "page": 28,
+        "category": "Bases de Datos",
+        "confidence": 94.6,
+        "chunkId": "chk_spn_opt_1102",
+        "cosineSimilarity": 0.946,
+        "snippet": "La saturación de CPU superior al 85% en nodos Spanner genera latencias P99 superiores a 1.2 segundos; se recomienda escalado a 12 nodos."
+      }
+    ]
+  }
+}

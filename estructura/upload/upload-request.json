@@ -1,0 +1,15 @@
+{
+  "fileName": "datadog_incident_trace_dump_2026.log",
+  "fileSizeBytes": 5242880,
+  "mimeType": "text/plain",
+  "category": "Telemetría & Logs",
+  "autoAttachToChat": true,
+  "targetConversationId": "chat-1",
+  "incidentTicket": "INC-2026-8942-PROD",
+  "metadata": {
+    "cluster": "eks-prod-us-east-01",
+    "namespace": "dojo-production",
+    "region": "us-east-1",
+    "uploadedBy": "Diego Bueno"
+  }
+}

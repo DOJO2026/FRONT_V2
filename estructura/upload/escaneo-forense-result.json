@@ -1,0 +1,28 @@
+{
+  "name": "volcado_forense_incidente_k8s.log",
+  "size": "3.4 MB",
+  "type": "text/plain",
+  "sha256": "193e94778ba8a1fc7a2f38f2d6ce5dfcba025843a2c1f775d9a72b9442743634",
+  "previewUrl": "blob:http://localhost:4200/evidence-preview-id",
+  "ocrExtractedData": {
+    "claimNumber": "INC-2026-8942-PROD",
+    "incidentDate": "15 de Agosto de 2026, 10:42 UTC",
+    "policyNumber": "#SLA-TI-99421",
+    "declaredAmount": "RTO: 12 min (P99 < 80ms)",
+    "category": "Telemetría de Infraestructura Cloud",
+    "confidenceScore": 99.8,
+    "issuer": "Archivo Validado por Diego Bueno · DevOps SRE"
+  },
+  "diagnostics": {
+    "rootCause": "Timeout en conexión gRPC hacia Cloud Spanner ocasionado por saturación en CoreDNS del cluster EKS-PROD-01",
+    "affectedServices": [
+      "api-gateway-ingress",
+      "payment-processor-v2",
+      "user-session-cache"
+    ],
+    "mitigationApplied": "Reinicio ordenado de daemonset CoreDNS y escalado automático de réplicas de 6 a 18 nodos",
+    "rtoActualMinutes": 12,
+    "rtoTargetMinutes": 15,
+    "slaBreach": false
+  }
+}

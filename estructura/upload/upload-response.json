@@ -1,0 +1,15 @@
+{
+  "success": true,
+  "data": {
+    "uploadId": "upl-1728148992000-a4f9",
+    "fileName": "datadog_incident_trace_dump_2026.log",
+    "sizeFormatted": "5.0 MB",
+    "sizeBytes": 5242880,
+    "status": "uploading",
+    "progress": 25,
+    "chunksEstimated": 68,
+    "uploadUrl": "https://storage.googleapis.com/dojo-telemetry-vault/uploads/upl-1728148992000-a4f9",
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "createdAt": "2026-10-05T15:45:00Z"
+  }
+}

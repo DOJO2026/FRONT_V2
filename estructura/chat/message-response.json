@@ -1,0 +1,40 @@
+{
+  "success": true,
+  "data": {
+    "message": {
+      "id": "ai-1728148900000",
+      "conversationId": "chat-1",
+      "role": "assistant",
+      "content": "### Configuración de Autoescalado y Throttling en API Gateway\n\nConforme al **Runbook de Operaciones Cloud DOJO 2.0**, los parámetros configurados para mitigar degradación de latencia P99 son:\n\n* **Límite de Ráfaga (Burst Limit)**: 5,000 req/seg por tenant.\n* **Tasa Sostenida (Rate Limit)**: 2,500 req/seg con ventana móvil de 60 segundos.\n* **Autoescalado HPA**: Réplicas mínimas: 6, réplicas máximas: 48, disparado al superar el 70% de consumo de CPU o >120ms de latencia media.\n* **Política de Degradación**: Redirección automática de tráfico no crítico a modo *circuit breaker* tras 3 reintentos fallidos.",
+      "timestamp": "10:45 AM",
+      "modelUsed": "Gemini 1.5 Pro • RAG",
+      "status": "complete",
+      "feedback": null,
+      "sources": [
+        {
+          "id": "src-101",
+          "title": "Runbook_Operaciones_Cloud_2026.pdf",
+          "page": 15,
+          "category": "DevOps & SRE",
+          "confidence": 98,
+          "snippet": "El copiloto DOJO AI analiza telemetría en tiempo real, correlaciona trazas OpenTelemetry y automatiza el diagnóstico de fallos críticos."
+        },
+        {
+          "id": "src-102",
+          "title": "Arquitectura_Plataforma_DOJO_2.0.pdf",
+          "page": 4,
+          "category": "Arquitectura & Sistemas",
+          "confidence": 95,
+          "snippet": "El API Gateway implementa rate limiting distribuido mediante Redis Cluster con tolerancia a particiones de red."
+        }
+      ]
+    },
+    "meta": {
+      "promptTokens": 642,
+      "completionTokens": 328,
+      "totalTokens": 970,
+      "inferenceTimeMs": 680,
+      "groundingChunksUsed": 2
+    }
+  }
+}

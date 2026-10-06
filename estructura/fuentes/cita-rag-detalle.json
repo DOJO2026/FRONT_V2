@@ -1,0 +1,14 @@
+{
+  "id": "src-101",
+  "title": "Runbook_Operaciones_Cloud_2026.pdf",
+  "page": 15,
+  "category": "DevOps & SRE",
+  "confidence": 98,
+  "chunkId": "chk_eks_sre_4921",
+  "cosineSimilarity": 0.982,
+  "tokensCount": 164,
+  "embeddingModel": "text-embedding-004",
+  "totalDocumentPages": 48,
+  "snippet": "El copiloto DOJO AI analiza telemetría en tiempo real, correlaciona trazas OpenTelemetry y automatiza el diagnóstico de fallos críticos aislando cuellos de botella en pods de Kubernetes y bases de datos distribuidas.",
+  "surroundingContext": "En escenarios de degradación de servicio (Severidad 1), la primera línea de respuesta activará el protocolo de telemetría automática. El copiloto DOJO AI analiza telemetría en tiempo real, correlaciona trazas OpenTelemetry y automatiza el diagnóstico de fallos críticos aislando cuellos de botella en pods de Kubernetes y bases de datos distribuidas. La remediación sugerida será validada mediante verificación criptográfica antes de ejecutar el drenado de nodos afectados."
+}

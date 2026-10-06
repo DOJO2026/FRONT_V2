@@ -1,0 +1,15 @@
+{
+  "query": "latencia P99 cuellos de botella Spanner autoescalado HPA",
+  "topK": 5,
+  "similarityThreshold": 0.80,
+  "categories": [
+    "Arquitectura & Cloud",
+    "DevOps & SRE",
+    "Bases de Datos"
+  ],
+  "hybridSearch": true,
+  "filters": {
+    "minYear": 2025,
+    "verifiedOnly": true
+  }
+}

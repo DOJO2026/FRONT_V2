@@ -1,0 +1,29 @@
+{
+  "name": "Diego Bueno",
+  "role": "Arquitecto Cloud & DevOps · DOJO 2.0",
+  "email": "diego.bueno@dojo.corp",
+  "department": "Infraestructura, Cloud & Sistemas TI",
+  "avatarInitials": "DB",
+  "avatarUrl": null,
+  "status": "online",
+  "tokensUsed": 42350,
+  "tokensQuota": 100000,
+  "quotaPercent": 42,
+  "permissions": [
+    "infra:read",
+    "infra:diagnose",
+    "cluster:inspect",
+    "incidents:create",
+    "incidents:mitigate",
+    "telemetry:export",
+    "rag:query"
+  ],
+  "preferences": {
+    "theme": "light",
+    "streamOutput": true,
+    "selectedModel": "gemini-1.5-pro",
+    "temperature": 0.2,
+    "reasoningDepth": "standard",
+    "zeroDataRetention": true
+  }
+}

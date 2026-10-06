@@ -1,0 +1,62 @@
+[
+  {
+    "id": "rep-1",
+    "title": "Arquitectura_Plataforma_DOJO_2.0.pdf",
+    "category": "Arquitectura & Cloud",
+    "size": "14.2 MB",
+    "updatedAt": "02 Oct 2026",
+    "chunks": 184,
+    "embeddingModel": "text-embedding-004",
+    "description": "Especificación técnica de microservicios, malla de servicios Istio, topología multi-región y políticas de tolerancia a fallos."
+  },
+  {
+    "id": "rep-2",
+    "title": "Runbook_Operaciones_Cloud_2026.pdf",
+    "category": "DevOps & SRE",
+    "size": "8.5 MB",
+    "updatedAt": "01 Oct 2026",
+    "chunks": 112,
+    "embeddingModel": "text-embedding-004",
+    "description": "Procedimientos operativos estándar ante alertas P1/P2, protocolos de drenado de nodos Kubernetes y contingencias de bases de datos."
+  },
+  {
+    "id": "rep-3",
+    "title": "Anexo_SLA_Infraestructura_2026.docx",
+    "category": "Gobernanza TI",
+    "size": "3.8 MB",
+    "updatedAt": "28 Sep 2026",
+    "chunks": 56,
+    "embeddingModel": "text-embedding-004",
+    "description": "Compromisos de disponibilidad 99.99%, RTO < 15 min, penalizaciones económicas y matriz de escalamiento."
+  },
+  {
+    "id": "rep-4",
+    "title": "Manual_Seguridad_Ciberseguridad_ISO27001.pdf",
+    "category": "Ciberseguridad & SOC2",
+    "size": "9.1 MB",
+    "updatedAt": "20 Sep 2026",
+    "chunks": 136,
+    "embeddingModel": "text-embedding-004",
+    "description": "Lineamientos de autenticación mTLS, rotación automática de llaves KMS, cifrado AES-256 y auditoría continua."
+  },
+  {
+    "id": "rep-5",
+    "title": "Guia_Optimizacion_Spanner_BigQuery.pdf",
+    "category": "Bases de Datos",
+    "size": "6.4 MB",
+    "updatedAt": "15 Sep 2026",
+    "chunks": 94,
+    "embeddingModel": "text-embedding-004",
+    "description": "Patrones de indexación, particionamiento de tablas distribuidas y optimización de hot spots en transacciones concurrentes."
+  },
+  {
+    "id": "rep-6",
+    "title": "Metricas_OpenTelemetry_Baseline_Q3.json",
+    "category": "Observabilidad",
+    "size": "2.1 MB",
+    "updatedAt": "10 Sep 2026",
+    "chunks": 42,
+    "embeddingModel": "text-embedding-004",
+    "description": "Línea base de telemetría, percentiles P90/P99 de microservicios y umbrales de saturación de infraestructura."
+  }
+]

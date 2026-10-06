@@ -1,0 +1,45 @@
+[
+  {
+    "event": "thinking",
+    "data": {
+      "step": "Analizando telemetría en tiempo real y correlacionando trazas OpenTelemetry...",
+      "timestamp": "2026-10-05T15:45:00.120Z"
+    }
+  },
+  {
+    "event": "sources",
+    "data": [
+      {
+        "id": "src-101",
+        "title": "Runbook_Operaciones_Cloud_2026.pdf",
+        "page": 15,
+        "category": "DevOps & SRE",
+        "confidence": 98,
+        "snippet": "El copiloto DOJO AI analiza telemetría en tiempo real, correlaciona trazas OpenTelemetry y automatiza el diagnóstico de fallos críticos."
+      }
+    ]
+  },
+  {
+    "event": "token",
+    "data": {
+      "delta": "### Configuración de Autoescalado",
+      "index": 0
+    }
+  },
+  {
+    "event": "token",
+    "data": {
+      "delta": " y Throttling en API Gateway\n\nConforme al",
+      "index": 1
+    }
+  },
+  {
+    "event": "done",
+    "data": {
+      "messageId": "ai-1728148900000",
+      "totalTokens": 970,
+      "finishReason": "STOP",
+      "status": "complete"
+    }
+  }
+]

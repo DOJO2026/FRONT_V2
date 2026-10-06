@@ -1,0 +1,49 @@
+:root {
+  /* DOJO 2.0 Brand / Primary (Corporate Marine Blue) */
+  --color-primary: #003781;
+  --color-primary-hover: #002860;
+  --color-primary-light: #e8f2fa;
+  --color-primary-glow: rgba(0, 55, 129, 0.22);
+
+  /* DOJO 2.0 Deep Corporate Navy */
+  --color-navy: #002147;
+  --color-navy-dark: #00162e;
+  --color-navy-header: #002b54;
+
+  /* DOJO 2.0 Vibrant Blue Accent */
+  --color-accent-blue: #007ab3;
+  --color-accent-blue-light: #e0f2fe;
+
+  /* Backgrounds (DOJO 2.0 Light Corporate Canvas) */
+  --color-background: #edf3f8;
+  --color-surface: #ffffff;
+  --color-surface-hover: #f5f9fc;
+  --color-surface-elevated: #ffffff;
+  --color-surface-card: #ffffff;
+
+  /* Borders */
+  --color-border: #dbe6f0;
+  --color-border-subtle: #eaf0f6;
+  --color-border-focus: #003781;
+
+  /* Typography Colors */
+  --color-text: #002147;
+  --color-text-secondary: #475569;
+  --color-text-muted: #64748b;
+  --color-text-inverse: #ffffff;
+
+  /* Status Colors */
+  --color-danger: #ef4444;
+  --color-danger-hover: #dc2626;
+  --color-danger-light: rgba(239, 68, 68, 0.12);
+
+  --color-warning: #f59e0b;
+  --color-warning-light: rgba(245, 158, 11, 0.12);
+
+  /* Success / Mint (Policy Active & 100% Progress) */
+  --color-success: #00a887;
+  --color-success-light: #e6f9f3;
+
+  --color-info: #007ab3;
+  --color-info-light: #e0f2fe;
+}

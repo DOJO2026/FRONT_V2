@@ -1,0 +1,67 @@
+{
+  "chat-1": [
+    {
+      "id": "msg-1",
+      "conversationId": "chat-1",
+      "role": "user",
+      "content": "Reportar caída en API Gateway y alta latencia en base de datos Cloud Spanner",
+      "timestamp": "10:41 AM"
+    },
+    {
+      "id": "msg-2",
+      "conversationId": "chat-1",
+      "role": "assistant",
+      "content": "Hemos recibido y registrado los detalles preliminares de tu incidencia técnica bajo el expediente provisional **#INC-2026-8942-PROD**.\n\nPara que nuestro equipo de **DevOps y SRE** pueda diagnosticar la causa raíz (RCA), aislar el impacto en microservicios y proceder a la mitigación dentro del SLA comprometido, **¿deseas adjuntar telemetría o evidencias de respaldo** (logs de error, volcados de trazas OpenTelemetry o capturas de monitoreo)?",
+      "timestamp": "10:42 AM",
+      "modelUsed": "Gemini 1.5 Pro • RAG",
+      "status": "complete",
+      "feedback": "up",
+      "interactiveType": "claim_ask_attachment",
+      "claimDetails": {
+        "claimNumber": "INC-2026-8942-PROD",
+        "status": "En Diagnóstico de Telemetría",
+        "description": "Caída en API Gateway y alta latencia en Spanner DB",
+        "policyNumber": "#SLA-TI-99421"
+      },
+      "sources": [
+        {
+          "id": "src-1",
+          "title": "Manual_Operaciones_SRE_Kubernetes.pdf",
+          "page": 11,
+          "category": "Gestión de Incidentes Críticos",
+          "confidence": 97,
+          "snippet": "La presentación de logs estructurados y métricas telemétricas con hash de autenticidad reduce el tiempo de resolución (MTTR) de 4 horas a menos de 15 minutos hábiles."
+        }
+      ]
+    }
+  ],
+  "chat-2": [
+    {
+      "id": "msg-3",
+      "conversationId": "chat-2",
+      "role": "user",
+      "content": "Genera un informe del consumo de compute units y latencia P99 de microservicios en el último sprint.",
+      "timestamp": "08:14 AM"
+    },
+    {
+      "id": "msg-4",
+      "conversationId": "chat-2",
+      "role": "assistant",
+      "content": "A continuación se presenta el **Informe de Telemetría & Rendimiento de Microservicios - Sprint 34**:\n\n### Métricas de Rendimiento P99\n* **API Gateway (Ingress)**: Latencia media de 42ms / P99 de 180ms (**dentro del umbral SLA de 250ms**).\n* **Servicio de Autenticación OAuth2**: Latencia media 18ms / P99 de 65ms.\n* **Worker Nodes Kubernetes**: Utilización promedio de CPU al 68% y memoria al 74%.\n\n### Recomendación Preventiva\nSe aconseja ajustar el umbral de HPA (Horizontal Pod Autoscaler) en el microservicio de pagos antes de la ventana de alta concurrencia de fin de mes.",
+      "timestamp": "08:15 AM",
+      "modelUsed": "Gemini 1.5 Pro • RAG",
+      "status": "complete",
+      "feedback": null,
+      "sources": [
+        {
+          "id": "src-2",
+          "title": "Metricas_Rendimiento_Cloud_Sprint34.json",
+          "page": 1,
+          "category": "Observabilidad",
+          "confidence": 98,
+          "snippet": "El 99.2% de las peticiones HTTP resolvieron en menos de 200ms en la región us-east1."
+        }
+      ]
+    }
+  ]
+}

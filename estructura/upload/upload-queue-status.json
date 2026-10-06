@@ -1,0 +1,41 @@
+[
+  {
+    "id": "upl-1728148992000-a4f9",
+    "name": "datadog_incident_trace_dump_2026.log",
+    "sizeFormatted": "5.0 MB",
+    "sizeBytes": 5242880,
+    "type": "text/plain",
+    "progress": 100,
+    "status": "ready",
+    "chunksCount": 68,
+    "embeddingModel": "text-embedding-004",
+    "autoAttach": true,
+    "errorMessage": null
+  },
+  {
+    "id": "upl-1728148993100-b8c1",
+    "name": "grafana_spanner_latency_spike.png",
+    "sizeFormatted": "2.4 MB",
+    "sizeBytes": 2516582,
+    "type": "image/png",
+    "progress": 75,
+    "status": "vectorizing",
+    "chunksCount": 32,
+    "embeddingModel": "multimodal-embedding-001",
+    "autoAttach": true,
+    "errorMessage": null
+  },
+  {
+    "id": "upl-1728148994500-c9d2",
+    "name": "crash_dump_coredns_k8s.log",
+    "sizeFormatted": "1.2 MB",
+    "sizeBytes": 1258291,
+    "type": "text/plain",
+    "progress": 30,
+    "status": "uploading",
+    "chunksCount": 18,
+    "embeddingModel": "text-embedding-004",
+    "autoAttach": false,
+    "errorMessage": null
+  }
+]

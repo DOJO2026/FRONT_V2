@@ -1,0 +1,45 @@
+{
+  "selectedModel": "gemini-1.5-pro",
+  "temperature": 0.2,
+  "reasoningDepth": "standard",
+  "streamOutput": true,
+  "ragSettings": {
+    "embeddingModel": "text-embedding-004",
+    "similarityThreshold": 0.82,
+    "topKChunks": 8,
+    "hybridSearch": true
+  },
+  "security": {
+    "allowHistory": true,
+    "zeroDataRetention": true
+  },
+  "availableModels": [
+    {
+      "id": "gemini-1.5-pro",
+      "name": "Gemini 1.5 Pro",
+      "tagline": "Razonamiento complejo, diagnóstico de infraestructura y correlación de telemetría RAG.",
+      "contextWindow": "2M tokens",
+      "badge": "Producción",
+      "badgeColor": "text-emerald-400 bg-emerald-500/10 border-emerald-500/20",
+      "isRecommended": true
+    },
+    {
+      "id": "gemini-1.5-flash",
+      "name": "Gemini 1.5 Flash",
+      "tagline": "Latencia ultra-baja (<400ms). Ideal para clasificación rápida y extracción de campos.",
+      "contextWindow": "1M tokens",
+      "badge": "Ultra Rápido",
+      "badgeColor": "text-cyan-400 bg-cyan-500/10 border-cyan-500/20",
+      "isRecommended": false
+    },
+    {
+      "id": "gemma-2-27b",
+      "name": "Gemma 2 27B (On-Premises)",
+      "tagline": "Despliegue soberano en infraestructura privada sin salida a internet público.",
+      "contextWindow": "128K tokens",
+      "badge": "Soberano",
+      "badgeColor": "text-amber-400 bg-amber-500/10 border-amber-500/20",
+      "isRecommended": false
+    }
+  ]
+}
