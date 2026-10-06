@@ -38,5 +38,5 @@
     }
   },
 
-  "postCreateCommand": "git lfs install && sudo apt-get update && sudo apt-get install -y chromium && npm install -g @angular/cli@20.3.2 && npm ci"
+  "postCreateCommand": "git lfs install && sudo apt-get update && sudo apt-get install -y chromium && npm install -g @angular/cli@20.3.2 && ng config --global cli.completion.prompted true && npm ci"
 }
