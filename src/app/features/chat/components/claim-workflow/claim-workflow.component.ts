@@ -709,6 +709,9 @@ export class ClaimWorkflowComponent {
           setTimeout(() => {
             this.isScanning.set(false);
             this.chatService.finalizeScannedDocument(this.message().id, file);
+            this.chatService.sendMessage(
+              `He escaneado y procesado el archivo "${file.name}". Revisa su contenido adjunto y genera el diagnóstico correspondiente.`
+            );
           }, 350);
           return 100;
         }

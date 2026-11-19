@@ -1,18 +1,25 @@
-import { Injectable, computed, inject, signal } from '@angular/core';
+import { Injectable, computed, effect, inject, signal } from '@angular/core';
 import { ChatStateService } from '../../../core/services/chat-state.service';
-import { ClaimsService } from '../../claims/services/claims.service';
-import { INITIAL_CHAT_MESSAGES_MOCK } from '../mocks/chat-messages.mock';
-import { ChatMessage, MessageSource, ScannedAttachment } from '../models/chat-message.model';
+import { SettingsService } from '../../../core/services/settings.service';
+import {
+  ChatMessage,
+  ChatMessageApiResponse,
+  ChatMessagesRequest,
+  ChatValidationError,
+  MessageSource,
+  ScannedAttachment
+} from '../models/chat-message.model';
+import { environment } from '../../../../environments/environment';
 
 @Injectable({
   providedIn: 'root'
 })
 export class ChatService {
   private readonly chatState = inject(ChatStateService);
-  private readonly claimsService = inject(ClaimsService);
+  private readonly settingsService = inject(SettingsService);
 
   // Map of conversationId -> ChatMessage[]
-  private readonly conversationStore = signal<Record<string, ChatMessage[]>>(INITIAL_CHAT_MESSAGES_MOCK);
+  private readonly conversationStore = signal<Record<string, ChatMessage[]>>({});
 
   // Active generation states
   readonly isThinking = signal<boolean>(false);
@@ -24,10 +31,7 @@ export class ChatService {
   readonly isGenerating = computed(() => this.isThinking() || this.isStreaming());
 
   // Contextual attached documents for prompt
-  readonly attachedDocs = signal<string[]>([
-    'Contrato_Marco_Operaciones.pdf',
-    'Anexo_SLA_2026.docx'
-  ]);
+  readonly attachedDocs = signal<string[]>([]);
 
   // Timers & active state tracking
   private thinkingTimeouts: ReturnType<typeof setTimeout>[] = [];
@@ -41,49 +45,23 @@ export class ChatService {
     return this.conversationStore()[activeId] || [];
   });
 
+  // Loading and error state for messages
+  readonly isLoadingMessages = signal(false);
+  readonly messagesError = signal<string | null>(null);
+
+  constructor() {
+    effect(() => {
+      const conversationId = this.chatState.activeChatId();
+      if (conversationId) {
+        void this.loadConversationMessages(conversationId);
+      }
+    });
+  }
+
   startClaimFlow(): void {
     const activeId = this.chatState.activeChatId();
     this.chatState.renameChat(activeId, 'Diagnóstico de Incidencia #INC-8942');
-
-    const userMsg: ChatMessage = {
-      id: `usr-${Date.now()}`,
-      conversationId: activeId,
-      role: 'user',
-      content: 'Reportar una incidencia técnica en producción',
-      timestamp: this.getCurrentTimeString(),
-      status: 'complete'
-    };
-    this.appendMessage(activeId, userMsg);
-
-    this.isThinking.set(true);
-    this.thinkingStep.set('Iniciando protocolo de atención de incidencias...');
-
-    setTimeout(() => {
-      this.isThinking.set(false);
-      this.thinkingStep.set('');
-
-      const assistantMsg: ChatMessage = {
-        id: `ai-${Date.now()}`,
-        conversationId: activeId,
-        role: 'assistant',
-        content: `Con gusto te asisto en el proceso de reporte y diagnóstico de incidencias de sistemas e infraestructura cloud.\n\nPor favor, **describe a continuación el problema técnico**: especifica el servicio o cluster afectado, la hora del fallo, el comportamiento anómalo (códigos 5xx, latencia, OOM) y el impacto operacional.`,
-        timestamp: this.getCurrentTimeString(),
-        modelUsed: 'Gemini 1.5 Pro • RAG',
-        status: 'complete',
-        interactiveType: 'claim_prompt_request',
-        sources: [
-          {
-            id: `src-claim-1`,
-            title: 'Manual_Operaciones_SRE_Kubernetes.pdf',
-            page: 4,
-            category: 'Gestión de Incidentes',
-            confidence: 99,
-            snippet: 'El equipo de operaciones registrará la incidencia consignando cluster, servicio impactado, ventana horaria y evidencias telemétricas.'
-          }
-        ]
-      };
-      this.appendMessage(activeId, assistantMsg);
-    }, 700);
+    this.sendMessage('Reportar una incidencia técnica en producción');
   }
 
   sendMessage(content: string): void {
@@ -106,7 +84,7 @@ export class ChatService {
     // Append user message immediately
     this.appendMessage(activeId, userMessage);
 
-    // Detect if user is submitting their claim description
+    // Detect and preserve existing claim workflow behavior locally.
     const isClaimContext =
       lastAssistantMsg?.interactiveType === 'claim_prompt_request' ||
       content.toLowerCase().includes('incidencia') ||
@@ -119,54 +97,108 @@ export class ChatService {
       content.toLowerCase().includes('fallo') ||
       content.toLowerCase().includes('bug');
 
-    if (isClaimContext) {
-      this.isThinking.set(true);
-      this.thinkingStep.set('Analizando telemetría y diagnosticando impacto en cluster...');
-
-      setTimeout(() => {
-        this.isThinking.set(false);
-        this.thinkingStep.set('');
-
-        const assistantMsg: ChatMessage = {
-          id: `ai-${Date.now()}`,
-          conversationId: activeId,
-          role: 'assistant',
-          content: `Hemos recibido y registrado los detalles preliminares de tu incidencia técnica bajo el expediente provisional **#INC-2026-8942-PROD**.\n\nPara que nuestro equipo de **DevOps y SRE** pueda diagnosticar la causa raíz (RCA), aislar el impacto en microservicios y proceder a la mitigación dentro del SLA comprometido, **¿deseas adjuntar telemetría o evidencias de respaldo** (logs de error, volcados de trazas OpenTelemetry o capturas de monitoreo)?`,
-          timestamp: this.getCurrentTimeString(),
-          modelUsed: 'Gemini 1.5 Pro • RAG',
-          status: 'complete',
-          interactiveType: 'claim_ask_attachment',
-          claimDetails: {
-            claimNumber: 'INC-2026-8942-PROD',
-            status: 'En Diagnóstico de Telemetría',
-            description: content.trim(),
-            policyNumber: '#SLA-TI-99421'
-          },
-          sources: [
-            {
-              id: `src-claim-evid-1`,
-              title: 'Manual_Operaciones_SRE_Kubernetes.pdf',
-              page: 11,
-              category: 'Gestión de Incidentes Críticos',
-              confidence: 97,
-              snippet: 'La presentación de logs estructurados y métricas telemétricas con hash de autenticidad reduce el tiempo de resolución (MTTR) de 4 horas a menos de 15 minutos hábiles.'
-            }
-          ]
-        };
-        this.appendMessage(activeId, assistantMsg);
-      }, 850);
-      return;
-    }
-
-    // Update conversation title if it was "Nueva conversación"
+    // The backend owns claim decisions and interactive response metadata.
+    // Keep the local naming behavior, but remove mock response generation.
     const currentChat = this.chatState.conversations().find((c) => c.id === activeId);
     if (currentChat && currentChat.title === 'Nueva conversación') {
       const summaryTitle = content.length > 40 ? content.slice(0, 40) + '...' : content;
       this.chatState.renameChat(activeId, summaryTitle);
     }
 
-    // Start simulated AI Thinking sequence
-    this.startThinkingSequence(activeId, content);
+    void this.postMessage(activeId, content.trim(), isClaimContext);
+  }
+
+  private async postMessage(conversationId: string, content: string, _isClaimContext: boolean): Promise<void> {
+    const requestAttachedDocs = [...this.attachedDocs()];
+    const request: ChatMessagesRequest = {
+      conversationId,
+      content,
+      modelId: this.settingsService.selectedModel(),
+      temperature: this.settingsService.temperature(),
+      reasoningDepth: this.settingsService.reasoningDepth(),
+      stream: this.settingsService.streamOutput(),
+      attachedDocs: requestAttachedDocs
+    };
+    this.attachedDocs.set([]);
+
+    this.isThinking.set(true);
+    this.thinkingStep.set('Enviando consulta al agente...');
+
+    try {
+      const response = await fetch(`/api/v1/chat/messages`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Accept': request.stream ? 'text/event-stream' : 'application/json'
+        },
+        body: JSON.stringify(request)
+      });
+
+      if (!response.ok) {
+        await this.handleApiError(response);
+        return;
+      }
+
+      if (request.stream) {
+        await this.consumeStreamingResponse(conversationId, response);
+      } else {
+        const payload = await response.json() as ChatMessageApiResponse | { success?: boolean; data?: { message?: ChatMessageApiResponse } };
+        const message = 'data' in payload && payload.data?.message
+          ? payload.data.message
+          : payload as ChatMessageApiResponse;
+        this.isThinking.set(false);
+        this.thinkingStep.set('');
+        this.appendApiMessage(conversationId, message);
+      }
+    } catch (error) {
+      this.appendApiError(conversationId, error instanceof Error ? error.message : 'No fue posible conectar con el agente.');
+    } finally {
+      if (!this.isStreaming()) {
+        this.isThinking.set(false);
+        this.thinkingStep.set('');
+      }
+    }
+  }
+
+  private async handleApiError(response: Response): Promise<void> {
+    this.isThinking.set(false);
+    this.thinkingStep.set('');
+
+    if (response.status === 422) {
+      try {
+        const validation = await response.json() as ChatValidationError;
+        const details = validation.detail?.map((item) => {
+          const field = item.loc?.length ? item.loc.join('.') : 'Solicitud';
+          return `${field}: ${item.msg}`;
+        }).join('\n') || 'Los datos enviados no son válidos.';
+        this.appendApiError(this.chatState.activeChatId(), `Error 422 — Datos inválidos\n${details}`);
+        return;
+      } catch {
+        // Fall through to generic handling.
+      }
+    }
+
+    let message = `El agente respondió con un error (${response.status}).`;
+    try {
+      const errorPayload = await response.json() as { detail?: unknown; error?: { message?: string }; message?: string };
+      if (typeof errorPayload.detail === 'string') message = errorPayload.detail;
+      if (errorPayload.error?.message) message = errorPayload.error.message;
+      if (errorPayload.message) message = errorPayload.message;
+    } catch {
+      // Preserve the generic status message.
+    }
+    this.appendApiError(this.chatState.activeChatId(), message);
+  }
+
+  private appendApiError(conversationId: string, message: string): void {
+    this.appendMessage(conversationId, {
+      id: `ai-error-${Date.now()}`,
+      conversationId,
+      role: 'assistant',
+      content: `⚠️ ${message}`,
+      timestamp: this.getCurrentTimeString(),
+      status: 'error'
+    });
   }
 
   acceptClaimAttachment(messageId: string): void {
@@ -223,17 +255,6 @@ export class ChatService {
   finalizeScannedDocument(messageId: string, file: ScannedAttachment): void {
     const activeId = this.chatState.activeChatId();
 
-    // Auto-registrar reclamo en ClaimsService y enviarlo a Power Automate
-    const newClaim = this.claimsService.createClaim({
-      title: `Reclamo generado por evidencia telemétrica: ${file.name}`,
-      category: 'SLA & Infraestructura',
-      priority: 'ALTA',
-      approverEmail: this.claimsService.config().outlookTriggerEmail || 'diego.bueno@ayesa.com',
-      amountOrImpact: file.ocrExtractedData?.declaredAmount || '$2,400 USD / RTO 12 min',
-      justification: `Evidencia técnica escaneada y validada en DOJO AI con firma SHA-256 (${file.sha256}). Se requiere aprobación para compensación y remediación de SLA.`,
-      autoSend: true
-    });
-
     this.conversationStore.update((store) => {
       const list = store[activeId] || [];
       return {
@@ -242,13 +263,8 @@ export class ChatService {
           m.id === messageId
             ? {
                 ...m,
-                content: `¡Tu documento **${file.name}** ha sido escaneado, verificado con firma digital y registrado como reclamo oficial!\n\nHemos creado el ticket **#${newClaim.id}** y lo hemos enviado automáticamente a **Power Automate** para aprobación interactiva en Outlook.`,
+                content: `Documento adjunto preparado: **${file.name}**`,
                 interactiveType: 'claim_scanned_result',
-                claimDetails: {
-                  claimNumber: newClaim.id,
-                  status: 'EN_APROBACION_OUTLOOK',
-                  description: newClaim.title
-                },
                 attachmentState: {
                   file,
                   isScanning: false,
@@ -260,82 +276,20 @@ export class ChatService {
       };
     });
 
-    if (!this.attachedDocs().includes(file.name)) {
-      this.attachedDocs.update((docs) => [file.name, ...docs]);
-    }
+    this.attachedDocs.set([file.name]);
   }
 
   startNewCleanChat(): void {
     this.chatState.newChat();
   }
 
-  private startThinkingSequence(conversationId: string, prompt: string): void {
-    this.clearAllTimers();
+  private startThinkingSequence(_conversationId: string, _prompt: string): void {
     this.isThinking.set(true);
-    this.isStreaming.set(false);
-    this.thinkingStep.set('Buscando en base documental y Vector Store...');
-
-    const t1 = setTimeout(() => {
-      this.thinkingStep.set('Extrayendo cláusulas relevantes y citas textuales...');
-    }, 800);
-
-    const t2 = setTimeout(() => {
-      this.thinkingStep.set('Sintetizando análisis ejecutivo con Copilot RAG...');
-    }, 1600);
-
-    const t3 = setTimeout(() => {
-      this.isThinking.set(false);
-      this.thinkingStep.set('');
-      this.startStreamingResponse(conversationId, prompt);
-    }, 2400);
-
-    this.thinkingTimeouts = [t1, t2, t3];
+    this.thinkingStep.set('Enviando consulta al agente...');
   }
 
-  private startStreamingResponse(conversationId: string, prompt: string): void {
-    const aiMsgId = `ai-${Date.now()}`;
-    this.activeStreamingMessageId = aiMsgId;
-
-    // Generate contextual sources based on prompt
-    this.activePendingSources = this.createContextualSources(prompt);
-
-    // Target text to stream
-    const targetText = this.createContextualAnswer(prompt);
-    const words = targetText.split(' ');
-    let currentWordIndex = 0;
-    let accumulatedContent = '';
-
-    // Create placeholder assistant message with streaming state
-    const aiMessage: ChatMessage = {
-      id: aiMsgId,
-      conversationId,
-      role: 'assistant',
-      content: '',
-      timestamp: this.getCurrentTimeString(),
-      modelUsed: 'Gemini 1.5 Pro • RAG',
-      status: 'streaming',
-      sources: []
-    };
-
-    this.appendMessage(conversationId, aiMessage);
-    this.isStreaming.set(true);
-
-    // Stream tokens in rapid natural bursts (20-30ms)
-    this.streamingInterval = setInterval(() => {
-      if (currentWordIndex < words.length) {
-        // Take 1 to 2 words per step for smooth reading pace
-        const wordsToTake = Math.min(2, words.length - currentWordIndex);
-        const chunk = words.slice(currentWordIndex, currentWordIndex + wordsToTake).join(' ');
-        accumulatedContent += (accumulatedContent ? ' ' : '') + chunk;
-        currentWordIndex += wordsToTake;
-
-        // Update message content in real time
-        this.updateMessageContent(conversationId, aiMsgId, accumulatedContent, 'streaming');
-      } else {
-        // Finished streaming full response
-        this.finalizeStreaming(conversationId, aiMsgId, accumulatedContent, this.activePendingSources);
-      }
-    }, 28);
+  private startStreamingResponse(_conversationId: string, _prompt: string): void {
+    // Streaming is handled by consumeStreamingResponse() using the Azure backend SSE.
   }
 
   stopGeneration(): void {
@@ -417,146 +371,6 @@ export class ChatService {
     }
   }
 
-  private createContextualSources(prompt: string): MessageSource[] {
-    const lower = prompt.toLowerCase();
-    const primaryDoc = this.attachedDocs()[0] || 'Base_Conocimiento_Corporativa.pdf';
-
-    if (lower.includes('nosotros') || lower.includes('empresa') || lower.includes('dojo') || lower.includes('sistema')) {
-      return [
-        {
-          id: `src-${Date.now()}-1`,
-          title: 'Arquitectura_Plataforma_DOJO_2.0.pdf',
-          page: 2,
-          category: 'Arquitectura & Sistemas',
-          confidence: 99,
-          snippet: 'DOJO 2.0 es la plataforma inteligente para gestión de infraestructura cloud, observabilidad y orquestación de microservicios con soporte SLA 99.99%.'
-        },
-        {
-          id: `src-${Date.now()}-2`,
-          title: 'Runbook_Operaciones_Cloud_2026.pdf',
-          page: 15,
-          category: 'DevOps & SRE',
-          confidence: 98,
-          snippet: 'El copiloto DOJO AI analiza telemetría en tiempo real, correlaciona trazas OpenTelemetry y automatiza el diagnóstico de fallos críticos.'
-        }
-      ];
-    }
-
-    if (lower.includes('sla') || lower.includes('disponibilidad') || lower.includes('tiempo')) {
-      return [
-        {
-          id: `src-${Date.now()}-1`,
-          title: 'Anexo_SLA_2026.docx',
-          page: 14,
-          category: 'Acuerdos Operativos',
-          confidence: 98,
-          snippet: 'El umbral mínimo de disponibilidad de infraestructura crítica se establece en 99.95%, con un RTO máximo de 15 minutos.'
-        },
-        {
-          id: `src-${Date.now()}-2`,
-          title: 'Procedimiento_Escalado_Incidencias.pdf',
-          page: 5,
-          category: 'Protocolo de Soporte',
-          confidence: 93,
-          snippet: 'Toda degradación de servicio que supere los 10 minutos activará automáticamente la célula de respuesta de nivel 3.'
-        }
-      ];
-    }
-
-    if (lower.includes('seguridad') || lower.includes('ciberseguridad') || lower.includes('iso')) {
-      return [
-        {
-          id: `src-${Date.now()}-1`,
-          title: 'Auditoría_Seguridad_ISO27001.pdf',
-          page: 22,
-          category: 'Seguridad & Ciberdefensa',
-          confidence: 97,
-          snippet: 'Las autenticaciones de usuarios privilegiados requieren factores biométricos o llaves FIDO2 conforme a la norma ISO/IEC 27001:2022.'
-        },
-        {
-          id: `src-${Date.now()}-2`,
-          title: 'Politica_Retencion_Cero.pdf',
-          page: 3,
-          category: 'Privacidad de Datos',
-          confidence: 94,
-          snippet: 'Los registros de inferencia de modelos generativos no serán almacenados para reentrenamiento sin consentimiento expreso.'
-        }
-      ];
-    }
-
-    return [
-      {
-        id: `src-${Date.now()}-1`,
-        title: primaryDoc,
-        page: Math.floor(Math.random() * 20) + 1,
-        category: 'RAG / Documento Principal',
-        confidence: 96,
-        snippet: `Sección relevante detectada para la consulta "${prompt.slice(0, 45)}...". Cumple con las normativas corporativas vigentes.`
-      },
-      {
-        id: `src-${Date.now()}-2`,
-        title: 'Guia_Cumplimiento_Gobierno_IA.pdf',
-        page: 7,
-        category: 'Gobierno de Datos',
-        confidence: 92,
-        snippet: 'Todas las decisiones asistidas por IA deben contar con supervisión humana y trazabilidad documental explícita.'
-      }
-    ];
-  }
-
-  private createContextualAnswer(prompt: string): string {
-    const lower = prompt.toLowerCase();
-
-    if (lower.includes('nosotros') || lower.includes('empresa') || lower.includes('dojo') || lower.includes('sistema')) {
-      return `### DOJO 2.0 • Plataforma Inteligente de Sistemas & Infraestructura Cloud
-
-**DOJO 2.0** es la solución empresarial de nueva generación diseñada para monitorear, diagnosticar y orquestar ecosistemas tecnológicos de alta escala. Diseñada para arquitectos cloud, ingenieros DevOps y equipos de operaciones críticas (SRE).
-
-### Capacidades Principales de DOJO 2.0
-* **Observabilidad Unificada & Telemetría**: Integración en tiempo real con Prometheus, Grafana, OpenTelemetry y Datadog sobre más de **1,200 microservicios** distribuidos en 7 regiones cloud.
-* **Diagnóstico Inteligente de Incidentes**: Reducción drástica del MTTR (*Mean Time to Resolution*) de 4 horas a menos de **15 minutos** mediante agentes IA que identifican cuellos de botella, bloqueos en bases de datos y fallos en API Gateways.
-* **Garantía y Monitoreo de SLA**: Supervisión continua de umbrales 99.99% con alertas automatizadas y planes de contingencia ante degradación de latencia P99.
-* **Arquitectura de Cero Fricción y Seguridad SOC2**: Cifrado AES-256 en reposo, TLS 1.3 en tránsito y cumplimiento exhaustivo de estándares ISO 27001 y SOC2 Tipo II.
-
-¿Deseas consultar el estado de los clusters Kubernetes, revisar las métricas de latencia de bases de datos o reportar un incidente crítico?`;
-    }
-
-    if (lower.includes('sla') || lower.includes('disponibilidad')) {
-      return `De acuerdo con el **Anexo de Niveles de Servicio (SLA 2026)** y la documentación técnica vinculada, he consolidado las condiciones vigentes:
-
-### Resumen de Compromisos de Disponibilidad
-* **Disponibilidad Comprometida**: 99.95% en régimen 24/7/365 para servicios críticos de misión empresarial.
-* **Tiempo Objetivo de Recuperación (RTO)**: Menor o igual a **15 minutos** ante fallos de infraestructura en zona primaria.
-* **Pérdida de Datos Tolerable (RPO)**: Reducida a **0 segundos** mediante replicación sincrónica multirregión.
-
-### Penalizaciones Contractuales
-* En caso de interrupción acumulada superior a 43 minutos en un mismo mes natural, se devengará una penalización automática del **8%** sobre la facturación mensual del módulo afectado.
-
-¿Deseas que genere una matriz comparativa frente al ejercicio anterior o que redacte un correo ejecutivo para el comité de riesgos?`;
-    }
-
-    if (lower.includes('seguridad') || lower.includes('iso') || lower.includes('ciberseguridad')) {
-      return `He contrastado tu consulta con el manual de **Auditoría de Seguridad y Cumplimiento ISO 27001:2022**:
-
-### Parámetros de Seguridad Obligatorios
-* **Cifrado en Tránsito y Reposo**: Todo flujo de telemetría e inferencia emplea AES-256 en reposo y TLS 1.3 con rotación de claves cada 90 días.
-* **Control de Identidad SSO/IAM**: Acceso regulado mediante autenticación multifactor estricta (FIDO2) y principio de menor privilegio (*Least Privilege*).
-* **Auditoría Inmutable**: Cualquier consulta sobre datos sensibles genera una entrada en el log central con hash SHA-256 indeleble.
-
-### Recomendación Operativa
-Se sugiere revisar los permisos de acceso de usuarios temporales antes del cierre de trimestre para evitar observaciones de auditoría externa.`;
-    }
-
-    return `He procesado tu consulta analizando los **documentos activos seleccionados** en el repositorio vectorial corporativo:
-
-### Diagnóstico y Puntos Clave
-* **Referencia analizada**: Se verificaron los acuerdos vigentes y políticas operacionales aplicables a tu solicitud.
-* **Disposiciones principales**: Cualquier requerimiento detectado debe mantener estricto alineamiento con los lineamientos de cumplimiento y trazabilidad.
-* **Garantía RAG**: La síntesis proviene directamente de los fragmentos recuperados con similitud de coseno superior a 0.88.
-
-¿Requieres que elabore un desglose específico de las cláusulas citadas o exporte la minuta a PDF / Markdown?`;
-  }
-
   private appendMessage(conversationId: string, msg: ChatMessage): void {
     this.conversationStore.update((store) => {
       const currentList = store[conversationId] || [];
@@ -596,12 +410,7 @@ Se sugiere revisar los permisos de acceso de usuarios temporales antes del cierr
 
       this.isThinking.set(true);
       this.thinkingStep.set('Regenerando respuesta con nuevas ponderaciones RAG...');
-      const t = setTimeout(() => {
-        this.isThinking.set(false);
-        this.thinkingStep.set('');
-        this.startStreamingResponse(activeId, prompt);
-      }, 1400);
-      this.thinkingTimeouts = [t];
+      void this.postMessage(activeId, prompt, false);
     }
   }
 
@@ -617,5 +426,218 @@ Se sugiere revisar los permisos de acceso de usuarios temporales antes del cierr
   private getCurrentTimeString(): string {
     const now = new Date();
     return now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+  }
+
+  private async consumeStreamingResponse(conversationId: string, response: Response): Promise<void> {
+    if (!response.body) {
+      this.appendApiError(conversationId, 'La respuesta streaming no contiene datos.');
+      return;
+    }
+
+    const aiMsgId = `ai-${Date.now()}`;
+    let accumulatedContent = '';
+    let sources: MessageSource[] = [];
+
+    this.isThinking.set(false);
+    this.thinkingStep.set('');
+    this.isStreaming.set(true);
+    this.activeStreamingMessageId = aiMsgId;
+
+    this.appendMessage(conversationId, {
+      id: aiMsgId,
+      conversationId,
+      role: 'assistant',
+      content: '',
+      timestamp: this.getCurrentTimeString(),
+      modelUsed: this.settingsService.currentModelDetails().name,
+      status: 'streaming',
+      sources: []
+    });
+
+    const reader = response.body.getReader();
+    const decoder = new TextDecoder();
+    let buffer = '';
+    let eventName = 'message';
+
+    while (true) {
+      const { done, value } = await reader.read();
+      if (done) break;
+      buffer += decoder.decode(value, { stream: true });
+
+      const lines = buffer.split('\n');
+      buffer = lines.pop() ?? '';
+      let dataLines: string[] = [];
+
+      for (const line of lines) {
+        if (line.startsWith('event:')) {
+          eventName = line.slice(6).trim();
+        } else if (line.startsWith('data:')) {
+          dataLines.push(line.slice(5).trim());
+        } else if (line === '') {
+          if (dataLines.length) {
+            const rawData = dataLines.join('\n');
+            this.processStreamEvent(conversationId, aiMsgId, eventName, rawData,
+              (delta) => { accumulatedContent += delta; },
+              (nextSources) => { sources = nextSources; });
+            dataLines = [];
+            eventName = 'message';
+          }
+        }
+      }
+    }
+
+    this.finalizeStreaming(conversationId, aiMsgId, accumulatedContent, sources);
+  }
+
+  private processStreamEvent(
+    conversationId: string,
+    aiMsgId: string,
+    eventName: string,
+    rawData: string,
+    appendDelta: (delta: string) => void,
+    setSources: (sources: MessageSource[]) => void
+  ): void {
+    try {
+      const data = JSON.parse(rawData) as unknown;
+
+      if (eventName === 'thinking') {
+        const payload = data as { step?: string };
+        if (payload.step) {
+          this.thinkingStep.set(payload.step);
+          this.isThinking.set(true);
+          this.isStreaming.set(false);
+        }
+      } else if (eventName === 'sources') {
+        const payload = Array.isArray(data) ? data : [];
+        const mapped = payload.map((source: { title?: string; url?: string; id?: string; page?: number; snippet?: string; confidence?: number; category?: string }, index: number) => ({
+          id: source.id || `src-api-${index}-${Date.now()}`,
+          title: source.title || 'Fuente documental',
+          url: source.url,
+          page: source.page,
+          snippet: source.snippet || '',
+          confidence: source.confidence ?? 0,
+          category: source.category
+        }));
+        setSources(mapped);
+        this.updateMessageSources(conversationId, aiMsgId, mapped);
+      } else if (eventName === 'token') {
+        const payload = data as { delta?: string };
+        if (payload.delta) {
+          this.isThinking.set(false);
+          this.isStreaming.set(true);
+          appendDelta(payload.delta);
+          const messages = this.conversationStore()[conversationId] || [];
+          const current = messages.find((m) => m.id === aiMsgId)?.content || '';
+          this.updateMessageContent(conversationId, aiMsgId, current + payload.delta, 'streaming');
+        }
+      } else if (eventName === 'done') {
+        // Finalize after the stream loop completes so remaining chunks are preserved.
+        this.isStreaming.set(false);
+      }
+    } catch {
+      // Ignore malformed SSE events and continue consuming the stream.
+    }
+  }
+
+  private appendApiMessage(conversationId: string, message: ChatMessageApiResponse): void {
+    if (message.role === 'assistant') {
+      this.appendMessage(conversationId, {
+        id: `ai-${Date.now()}`,
+        conversationId: message.conversationId || conversationId,
+        role: 'assistant',
+        content: message.content,
+        timestamp: message.timestamp || this.getCurrentTimeString(),
+        sources: message.sources?.map((source, index) => ({
+          id: `src-api-${index}-${Date.now()}`,
+          title: source.title,
+          url: source.url,
+          snippet: '',
+          confidence: 0
+        })) || [],
+        status: message.status === 'error' ? 'error' : 'complete',
+        feedback: message.feedback,
+        modelUsed: message.modelUsed,
+        interactiveType: message.interactiveType,
+        claimDetails: message.claimDetails
+      });
+    }
+  }
+
+  private updateMessageSources(conversationId: string, messageId: string, sources: MessageSource[]): void {
+    this.conversationStore.update((store) => {
+      const list = store[conversationId] || [];
+      return {
+        ...store,
+        [conversationId]: list.map((message) =>
+          message.id === messageId ? { ...message, sources } : message
+        )
+      };
+    });
+  }
+
+  async loadConversationMessages(conversationId: string): Promise<void> {
+    this.isLoadingMessages.set(true);
+    this.messagesError.set(null);
+
+    try {
+      const response = await fetch(
+        `${environment.apiBaseUrl}/api/v1/chat/conversations/${encodeURIComponent(conversationId)}/messages`,
+        {
+          method: 'GET',
+          headers: { 'Accept': 'application/json' }
+        }
+      );
+
+      if (!response.ok) {
+        if (response.status === 422) {
+          const validation = await response.json() as ChatValidationError;
+          const details = validation.detail?.map((item) =>
+            `${item.loc?.join('.') || 'id'}: ${item.msg}`
+          ).join('\n') || 'El identificador de conversación no es válido.';
+          throw new Error(`Error 422 — ${details}`);
+        }
+        throw new Error(`No fue posible cargar los mensajes (${response.status}).`);
+      }
+
+      const payload = await response.json() as ChatMessage[] | { data?: { messages?: ChatMessage[] }; messages?: ChatMessage[] };
+      let messages: ChatMessage[];
+
+      if (Array.isArray(payload)) {
+        messages = payload;
+      } else if (payload.data?.messages) {
+        messages = payload.data.messages;
+      } else {
+        messages = payload.messages || [];
+      }
+
+      this.conversationStore.update((store) => ({
+        ...store,
+        [conversationId]: messages.map((message) => this.normalizeApiMessage(conversationId, message))
+      }));
+    } catch (error) {
+      this.messagesError.set(error instanceof Error ? error.message : 'Error al cargar los mensajes.');
+    } finally {
+      this.isLoadingMessages.set(false);
+    }
+  }
+
+  private normalizeApiMessage(conversationId: string, message: ChatMessage): ChatMessage {
+    return {
+      ...message,
+      id: message.id || `msg-${Date.now()}-${Math.random()}`,
+      conversationId: message.conversationId || conversationId,
+      role: message.role === 'assistant' ? 'assistant' : 'user',
+      timestamp: message.timestamp || this.getCurrentTimeString(),
+      status: message.status || 'complete',
+      sources: message.sources?.map((source, index) => ({
+        id: source.id || `src-api-${index}-${Date.now()}`,
+        title: source.title || 'Fuente documental',
+        url: source.url,
+        page: source.page,
+        snippet: source.snippet || '',
+        confidence: source.confidence ?? 0,
+        category: source.category
+      })) || []
+    };
   }
 }

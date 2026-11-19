@@ -43,9 +43,11 @@ export class SidebarSearchComponent {
   protected onSearchInput(event: Event): void {
     const value = (event.target as HTMLInputElement).value;
     this.chatState.searchQuery.set(value);
+    void this.chatState.loadConversations({ archived: false, title: value });
   }
 
   protected clearSearch(): void {
     this.chatState.searchQuery.set('');
+    void this.chatState.loadConversations({ archived: false });
   }
 }

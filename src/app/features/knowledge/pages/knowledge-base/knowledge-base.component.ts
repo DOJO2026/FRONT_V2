@@ -172,7 +172,13 @@ import { KnowledgeService } from '../../services/knowledge.service';
       </div>
 
       <!-- Document Cards Grid -->
-      @if (documents().length === 0) {
+      @if (knowledgeService.isLoading()) {
+        <div class="text-sm text-slate-400 px-2 py-4">Cargando fuentes indexadas...</div>
+      } @else if (knowledgeService.loadError(); as error) {
+        <div class="text-sm text-rose-400 bg-rose-950/20 border border-rose-900/40 rounded-lg px-4 py-3">
+          {{ error }}
+        </div>
+      } @else if (documents().length === 0) {
         <ai-empty-state
           icon="document"
           title="No se encontraron documentos"

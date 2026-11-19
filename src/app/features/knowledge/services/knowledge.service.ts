@@ -1,7 +1,26 @@
 import { Injectable, computed, inject, signal } from '@angular/core';
 import { ChatService } from '../../chat/services/chat.service';
-import { INITIAL_KNOWLEDGE_DOCS_MOCK, KNOWLEDGE_STATS_MOCK } from '../mocks/knowledge.mock';
+import { environment } from '../../../../environments/environment';
 import { KnowledgeCategory, KnowledgeDocument, KnowledgeStats } from '../models/knowledge.model';
+
+export interface RepositoryDocument {
+  id: string;
+  title: string;
+  category: string;
+  size: string;
+  updatedAt: string;
+  chunks: number;
+  embeddingModel: string;
+  description: string;
+}
+
+export interface RepositoryResponse {
+  success?: boolean;
+  data?: {
+    totalDocuments?: number;
+    documents?: RepositoryDocument[];
+  };
+}
 
 @Injectable({
   providedIn: 'root'
@@ -9,14 +28,23 @@ import { KnowledgeCategory, KnowledgeDocument, KnowledgeStats } from '../models/
 export class KnowledgeService {
   private readonly chatService = inject(ChatService);
 
-  readonly documents = signal<KnowledgeDocument[]>(INITIAL_KNOWLEDGE_DOCS_MOCK);
-  readonly stats = signal<KnowledgeStats>(KNOWLEDGE_STATS_MOCK);
+  readonly documents = signal<KnowledgeDocument[]>([]);
+  readonly stats = signal<KnowledgeStats>({
+    totalDocuments: 0,
+    totalChunks: 0,
+    vectorStorageSize: '0 MB',
+    embeddingModel: 'text-embedding-004',
+    avgQueryLatency: '—',
+    indexedDepartments: 0
+  });
 
   readonly searchQuery = signal<string>('');
   readonly selectedCategory = signal<string>('Todos');
   readonly selectedDocForInspection = signal<KnowledgeDocument | null>(null);
   readonly isIndexingModalOpen = signal<boolean>(false);
   readonly isReindexingAll = signal<boolean>(false);
+  readonly isLoading = signal(false);
+  readonly loadError = signal<string | null>(null);
 
   readonly filteredDocuments = computed(() => {
     const query = this.searchQuery().trim().toLowerCase();
@@ -38,6 +66,10 @@ export class KnowledgeService {
 
     return list;
   });
+
+  constructor() {
+    void this.loadRepository();
+  }
 
   setSearchQuery(query: string): void {
     this.searchQuery.set(query);
@@ -186,5 +218,70 @@ export class KnowledgeService {
     }));
 
     this.closeIndexingModal();
+  }
+
+  async loadRepository(): Promise<void> {
+    this.isLoading.set(true);
+    this.loadError.set(null);
+
+    try {
+      const response = await fetch(`${environment.apiBaseUrl}/api/v1/fuentes`, {
+        method: 'GET',
+        headers: { 'Accept': 'application/json' }
+      });
+
+      if (!response.ok) {
+        throw new Error(`No fue posible cargar las fuentes (${response.status}).`);
+      }
+
+      const payload = await response.json() as RepositoryDocument[] | RepositoryResponse;
+      const repositoryDocs = Array.isArray(payload)
+        ? payload
+        : payload.data?.documents || [];
+
+      const documents = repositoryDocs.map((doc) => this.normalizeRepositoryDocument(doc));
+      this.documents.set(documents);
+      this.stats.update((stats) => ({
+        ...stats,
+        totalDocuments: documents.length,
+        totalChunks: documents.reduce((total, doc) => total + doc.chunksCount, 0),
+        indexedDepartments: new Set(documents.map((doc) => doc.category)).size,
+        embeddingModel: documents[0]?.embeddingModel || 'text-embedding-004'
+      }));
+    } catch (error) {
+      this.loadError.set(error instanceof Error ? error.message : 'Error al cargar las fuentes.');
+      this.documents.set([]);
+    } finally {
+      this.isLoading.set(false);
+    }
+  }
+
+  private normalizeRepositoryDocument(doc: RepositoryDocument): KnowledgeDocument {
+    const category = this.normalizeCategory(doc.category);
+
+    return {
+      id: doc.id,
+      title: doc.title,
+      category,
+      fileSize: doc.size,
+      totalPages: 1,
+      chunksCount: doc.chunks,
+      embeddingModel: doc.embeddingModel,
+      dimension: 768,
+      avgSimilarity: 0,
+      status: 'indexed',
+      lastUpdated: doc.updatedAt,
+      isActiveInChat: false,
+      chunks: []
+    };
+  }
+
+  private normalizeCategory(category: string): KnowledgeCategory {
+    const normalized = category.toLowerCase();
+    if (normalized.includes('legal') || normalized.includes('sla')) return 'Legal';
+    if (normalized.includes('seguridad') || normalized.includes('ciber')) return 'Ciberseguridad';
+    if (normalized.includes('oper')) return 'Operaciones';
+    if (normalized.includes('finanz')) return 'Finanzas';
+    return 'Operaciones';
   }
 }

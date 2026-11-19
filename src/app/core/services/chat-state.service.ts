@@ -1,5 +1,6 @@
 import { Injectable, computed, signal } from '@angular/core';
 import { ChatConversation, UserProfile } from '../models/chat.model';
+import { environment } from '../../../environments/environment';
 
 @Injectable({
   providedIn: 'root'
@@ -20,127 +21,9 @@ export class ChatStateService {
   readonly searchQuery = signal<string>('');
   readonly activeChatId = signal<string>('chat-1');
 
-  readonly conversations = signal<ChatConversation[]>([
-    {
-      id: 'chat-1',
-      title: 'Diagnóstico de Caída en API Gateway y Spanner',
-      updatedAt: '10:42 AM',
-      dateGroup: 'Hoy',
-      pinned: true,
-      archived: false,
-      messageCount: 14,
-      category: 'Operaciones',
-      modelUsed: 'Gemini 1.5 Pro • RAG',
-      citedSourcesCount: 5,
-      tokensUsed: 4210,
-      positiveFeedbackCount: 4
-    },
-    {
-      id: 'chat-2',
-      title: 'Extracción de Métricas y Latencia P99 de Microservicios',
-      updatedAt: '08:15 AM',
-      dateGroup: 'Hoy',
-      pinned: true,
-      archived: false,
-      messageCount: 8,
-      category: 'Observabilidad',
-      modelUsed: 'Gemini 1.5 Pro • RAG',
-      citedSourcesCount: 3,
-      tokensUsed: 2150,
-      positiveFeedbackCount: 2
-    },
-    {
-      id: 'chat-3',
-      title: 'Auditoría de Cumplimiento Normativo SOC2 en Kubernetes',
-      updatedAt: 'Ayer',
-      dateGroup: 'Ayer',
-      archived: false,
-      messageCount: 22,
-      category: 'Ciberseguridad',
-      modelUsed: 'Gemini 1.5 Pro • RAG',
-      citedSourcesCount: 7,
-      tokensUsed: 6840,
-      positiveFeedbackCount: 5
-    },
-    {
-      id: 'chat-4',
-      title: 'Resumen de Políticas de Ciberseguridad y WAF',
-      updatedAt: 'Ayer',
-      dateGroup: 'Ayer',
-      archived: false,
-      messageCount: 5,
-      category: 'Ciberseguridad',
-      modelUsed: 'Gemini 1.5 Flash',
-      citedSourcesCount: 2,
-      tokensUsed: 1420,
-      positiveFeedbackCount: 1
-    },
-    {
-      id: 'chat-5',
-      title: 'Revisión de SLA de Infraestructura Cloud y Concurrencia',
-      updatedAt: '3 días atrás',
-      dateGroup: 'Últimos 7 días',
-      archived: false,
-      messageCount: 17,
-      category: 'Infraestructura',
-      modelUsed: 'Gemini 1.5 Pro • RAG',
-      citedSourcesCount: 6,
-      tokensUsed: 5120,
-      positiveFeedbackCount: 4
-    },
-    {
-      id: 'chat-6',
-      title: 'Estrategia de Migración Multi-Cloud 2026',
-      updatedAt: '5 días atrás',
-      dateGroup: 'Últimos 7 días',
-      archived: false,
-      messageCount: 31,
-      category: 'Operaciones',
-      modelUsed: 'Gemini 1.5 Pro • RAG',
-      citedSourcesCount: 8,
-      tokensUsed: 9420,
-      positiveFeedbackCount: 7
-    },
-    {
-      id: 'chat-7',
-      title: 'Optimización de Consultas BigQuery y Réplicas',
-      updatedAt: '18 Feb',
-      dateGroup: 'Mes anterior',
-      archived: false,
-      messageCount: 12,
-      category: 'Bases de Datos',
-      modelUsed: 'Gemini 1.5 Pro • RAG',
-      citedSourcesCount: 4,
-      tokensUsed: 3880,
-      positiveFeedbackCount: 3
-    },
-    {
-      id: 'chat-archived-1',
-      title: 'Auditoría Anual de Privacidad GDPR 2025',
-      updatedAt: '12 Ene',
-      dateGroup: 'Mes anterior',
-      archived: true,
-      messageCount: 19,
-      category: 'Legal',
-      modelUsed: 'Gemini 1.5 Pro • RAG',
-      citedSourcesCount: 6,
-      tokensUsed: 5900,
-      positiveFeedbackCount: 4
-    },
-    {
-      id: 'chat-archived-2',
-      title: 'Auditoría Forense de Logs y Acceso a Servidores',
-      updatedAt: '05 Ene',
-      dateGroup: 'Mes anterior',
-      archived: true,
-      messageCount: 10,
-      category: 'Ciberseguridad',
-      modelUsed: 'Gemma 2 27B',
-      citedSourcesCount: 2,
-      tokensUsed: 2750,
-      positiveFeedbackCount: 2
-    }
-  ]);
+  readonly conversations = signal<ChatConversation[]>([]);
+  readonly isLoadingConversations = signal(false);
+  readonly conversationsError = signal<string | null>(null);
 
   readonly filteredConversations = computed(() => {
     const query = this.searchQuery().trim().toLowerCase();
@@ -166,6 +49,67 @@ export class ChatStateService {
 
     return groups;
   });
+
+  constructor() {
+    void this.loadConversations({ archived: false });
+  }
+
+  async loadConversations(query: ConversationsQuery = {}): Promise<void> {
+    this.isLoadingConversations.set(true);
+    this.conversationsError.set(null);
+
+    try {
+      const params = new URLSearchParams();
+      if (query.archived !== undefined) params.set('archived', String(query.archived));
+      if (query.category?.trim()) params.set('category', query.category.trim());
+      if (query.title?.trim()) params.set('title', query.title.trim());
+
+      const queryString = params.toString();
+      const url = `${environment.apiBaseUrl}/api/v1/chat/conversations${queryString ? `?${queryString}` : ''}`;
+      const response = await fetch(url, {
+        method: 'GET',
+        headers: { 'Accept': 'application/json' }
+      });
+
+      if (!response.ok) {
+        if (response.status === 422) {
+          const validation = await response.json() as ConversationValidationError;
+          const message = validation.detail?.map((item) =>
+            `${item.loc?.join('.') || 'Parámetro'}: ${item.msg}`
+          ).join('\n') || 'Los parámetros de consulta no son válidos.';
+          throw new Error(message);
+        }
+        throw new Error(`No fue posible cargar las conversaciones (${response.status}).`);
+      }
+
+      const payload = await response.json() as ChatConversation[] | { data?: ChatConversation[]; conversations?: ChatConversation[] };
+      const conversations = Array.isArray(payload)
+        ? payload
+        : payload.data || payload.conversations || [];
+
+      this.conversations.set(conversations.map((conversation) => this.normalizeConversation(conversation)));
+      if (!this.conversations().some((conversation) => conversation.id === this.activeChatId())) {
+        const first = this.conversations()[0];
+        if (first) this.activeChatId.set(first.id);
+      }
+    } catch (error) {
+      this.conversationsError.set(error instanceof Error ? error.message : 'Error al cargar las conversaciones.');
+      this.conversations.set([]);
+    } finally {
+      this.isLoadingConversations.set(false);
+    }
+  }
+
+  private normalizeConversation(conversation: ChatConversation): ChatConversation {
+    return {
+      ...conversation,
+      id: String(conversation.id),
+      title: conversation.title || 'Conversación sin título',
+      updatedAt: conversation.updatedAt || 'Ahora',
+      dateGroup: conversation.dateGroup || 'Hoy',
+      archived: conversation.archived ?? false
+    };
+  }
 
   toggleArchive(id: string): void {
     this.conversations.update((list) =>
@@ -229,4 +173,18 @@ export class ChatStateService {
       list.map((c) => (c.id === id ? { ...c, title: newTitle.trim() } : c))
     );
   }
+}
+
+export interface ConversationsQuery {
+  archived?: boolean;
+  category?: string;
+  title?: string;
+}
+
+export interface ConversationValidationError {
+  detail: Array<{
+    loc: Array<string | number>;
+    msg: string;
+    type: string;
+  }>;
 }

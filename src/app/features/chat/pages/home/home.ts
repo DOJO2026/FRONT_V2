@@ -278,6 +278,16 @@ export type AssistantViewMode = 'damage' | 'policy' | 'chat';
               <!-- ========================================================= -->
               @if (activeMode() === 'chat') {
                 <div class="flex flex-col gap-4 animate-cascade-in">
+                  @if (chatService.isLoadingMessages()) {
+                    <div class="text-xs text-slate-500 px-2 py-1">Cargando mensajes...</div>
+                  }
+
+                  @if (chatService.messagesError(); as error) {
+                    <div class="text-xs text-rose-600 bg-rose-50 border border-rose-200 rounded-lg px-3 py-2">
+                      {{ error }}
+                    </div>
+                  }
+
                   @for (msg of messages(); track msg.id) {
                     <app-message-bubble [message]="msg" />
                   }
